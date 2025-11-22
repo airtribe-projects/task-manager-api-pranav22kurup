@@ -42,9 +42,10 @@ app.post('/tasks', (req, res) => {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    // Create new task
+    // Create new task with next available ID
+    const maxId = tasks.reduce((max, task) => Math.max(max, task.id), 0);
     const newTask = {
-        id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+        id: maxId + 1,
         title,
         description,
         completed
@@ -65,8 +66,8 @@ app.put('/tasks/:id', (req, res) => {
     
     const { title, description, completed } = req.body;
     
-    // Validate data types
-    if (typeof completed !== 'boolean') {
+    // Validate required fields and data types
+    if (!title || !description || typeof completed !== 'boolean') {
         return res.status(400).json({ error: 'Invalid data types' });
     }
     

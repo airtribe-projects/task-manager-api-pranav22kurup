@@ -134,6 +134,7 @@ tap.test("PUT /tasks/:id with invalid data", async (t) => {
   };
   const response = await server.put("/tasks/1").send(updatedTask);
   t.equal(response.status, 400);
+  t.match(response.body, { error: "Completed must be a boolean value" });
   t.end();
 });
 

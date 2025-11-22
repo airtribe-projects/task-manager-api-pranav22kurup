@@ -78,7 +78,7 @@ app.put('/tasks/:id', (req, res) => {
     
     // Validate required fields
     if (title === undefined || description === undefined || completed === undefined) {
-        return res.status(400).json({ error: 'Invalid data types' });
+        return res.status(400).json({ error: 'Missing required fields' });
     }
     
     // Validate title and description are not empty
@@ -88,7 +88,7 @@ app.put('/tasks/:id', (req, res) => {
     
     // Validate completed is a boolean
     if (typeof completed !== 'boolean') {
-        return res.status(400).json({ error: 'Invalid data types' });
+        return res.status(400).json({ error: 'Completed must be a boolean value' });
     }
     
     // Update task

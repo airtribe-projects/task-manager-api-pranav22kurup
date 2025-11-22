@@ -38,8 +38,18 @@ app.post('/tasks', (req, res) => {
     const { title, description, completed } = req.body;
     
     // Validate required fields
-    if (!title || !description || completed === undefined) {
+    if (title === undefined || description === undefined || completed === undefined) {
         return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // Validate title and description are not empty
+    if (typeof title !== 'string' || typeof description !== 'string' || title.trim() === '' || description.trim() === '') {
+        return res.status(400).json({ error: 'Title and description cannot be empty' });
+    }
+    
+    // Validate completed is a boolean
+    if (typeof completed !== 'boolean') {
+        return res.status(400).json({ error: 'Completed must be a boolean value' });
     }
     
     // Create new task with next available ID
@@ -66,9 +76,19 @@ app.put('/tasks/:id', (req, res) => {
     
     const { title, description, completed } = req.body;
     
-    // Validate required fields and data types
-    if (!title || !description || typeof completed !== 'boolean') {
-        return res.status(400).json({ error: 'Invalid data types' });
+    // Validate required fields
+    if (title === undefined || description === undefined || completed === undefined) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // Validate title and description are not empty
+    if (typeof title !== 'string' || typeof description !== 'string' || title.trim() === '' || description.trim() === '') {
+        return res.status(400).json({ error: 'Title and description cannot be empty' });
+    }
+    
+    // Validate completed is a boolean
+    if (typeof completed !== 'boolean') {
+        return res.status(400).json({ error: 'Completed must be a boolean value' });
     }
     
     // Update task

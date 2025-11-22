@@ -174,6 +174,172 @@ tap.test("DELETE /tasks/:id with invalid id", async (t) => {
   t.end();
 });
 
+// Tests for filtering by completion status
+tap.test("GET /tasks?completed=true - Filter completed tasks", async (t) => {
+  const response = await server.get("/tasks?completed=true");
+  t.equal(response.status, 200);
+  t.ok(Array.isArray(response.body));
+  // All returned tasks should be completed
+  response.body.forEach(task => {
+    t.equal(task.completed, true);
+  });
+  t.end();
+});
+
+tap.test("GET /tasks?completed=false - Filter incomplete tasks", async (t) => {
+  const response = await server.get("/tasks?completed=false");
+  t.equal(response.status, 200);
+  t.ok(Array.isArray(response.body));
+  // All returned tasks should be incomplete
+  response.body.forEach(task => {
+    t.equal(task.completed, false);
+  });
+  t.end();
+});
+
+// Tests for sorting by creation date
+tap.test("GET /tasks?sortBy=createdAt - Sort tasks by creation date", async (t) => {
+  const response = await server.get("/tasks?sortBy=createdAt");
+  t.equal(response.status, 200);
+  t.ok(Array.isArray(response.body));
+  
+  // Verify tasks are sorted by createdAt (ascending)
+  for (let i = 1; i < response.body.length; i++) {
+    const prevDate = new Date(response.body[i - 1].createdAt);
+    const currDate = new Date(response.body[i].createdAt);
+    t.ok(prevDate <= currDate, "Tasks should be sorted by creation date");
+  }
+  t.end();
+});
+
+// Tests for priority field in POST
+tap.test("POST /tasks with priority", async (t) => {
+  const newTask = {
+    title: "High priority task",
+    description: "This is a high priority task",
+    completed: false,
+    priority: "high",
+  };
+  const response = await server.post("/tasks").send(newTask);
+  t.equal(response.status, 201);
+  t.equal(response.body.priority, "high");
+  t.hasOwnProp(response.body, "createdAt");
+  t.end();
+});
+
+tap.test("POST /tasks without priority (should default to medium)", async (t) => {
+  const newTask = {
+    title: "Task without priority",
+    description: "This task has no priority specified",
+    completed: false,
+  };
+  const response = await server.post("/tasks").send(newTask);
+  t.equal(response.status, 201);
+  t.equal(response.body.priority, "medium");
+  t.end();
+});
+
+tap.test("POST /tasks with invalid priority", async (t) => {
+  const newTask = {
+    title: "Invalid priority task",
+    description: "This task has invalid priority",
+    completed: false,
+    priority: "urgent",
+  };
+  const response = await server.post("/tasks").send(newTask);
+  t.equal(response.status, 400);
+  t.match(response.body, { error: "Priority must be low, medium, or high" });
+  t.end();
+});
+
+// Tests for priority field in PUT
+tap.test("PUT /tasks/:id with priority update", async (t) => {
+  const updatedTask = {
+    title: "Updated Task",
+    description: "Updated Task Description",
+    completed: true,
+    priority: "low",
+  };
+  const response = await server.put("/tasks/2").send(updatedTask);
+  t.equal(response.status, 200);
+  t.equal(response.body.priority, "low");
+  t.end();
+});
+
+tap.test("PUT /tasks/:id with invalid priority", async (t) => {
+  const updatedTask = {
+    title: "Updated Task",
+    description: "Updated Task Description",
+    completed: true,
+    priority: "critical",
+  };
+  const response = await server.put("/tasks/3").send(updatedTask);
+  t.equal(response.status, 400);
+  t.match(response.body, { error: "Priority must be low, medium, or high" });
+  t.end();
+});
+
+// Tests for GET /tasks/priority/:level
+tap.test("GET /tasks/priority/high - Get high priority tasks", async (t) => {
+  const response = await server.get("/tasks/priority/high");
+  t.equal(response.status, 200);
+  t.ok(Array.isArray(response.body));
+  // All returned tasks should have high priority
+  response.body.forEach(task => {
+    t.equal(task.priority, "high");
+  });
+  t.end();
+});
+
+tap.test("GET /tasks/priority/medium - Get medium priority tasks", async (t) => {
+  const response = await server.get("/tasks/priority/medium");
+  t.equal(response.status, 200);
+  t.ok(Array.isArray(response.body));
+  // All returned tasks should have medium priority
+  response.body.forEach(task => {
+    t.equal(task.priority, "medium");
+  });
+  t.end();
+});
+
+tap.test("GET /tasks/priority/low - Get low priority tasks", async (t) => {
+  const response = await server.get("/tasks/priority/low");
+  t.equal(response.status, 200);
+  t.ok(Array.isArray(response.body));
+  // All returned tasks should have low priority
+  response.body.forEach(task => {
+    t.equal(task.priority, "low");
+  });
+  t.end();
+});
+
+tap.test("GET /tasks/priority/:level with invalid level", async (t) => {
+  const response = await server.get("/tasks/priority/urgent");
+  t.equal(response.status, 400);
+  t.match(response.body, { error: "Invalid priority level. Must be low, medium, or high" });
+  t.end();
+});
+
+// Test combining filters and sorting
+tap.test("GET /tasks?completed=false&sortBy=createdAt - Combine filters", async (t) => {
+  const response = await server.get("/tasks?completed=false&sortBy=createdAt");
+  t.equal(response.status, 200);
+  t.ok(Array.isArray(response.body));
+  
+  // Verify all tasks are incomplete
+  response.body.forEach(task => {
+    t.equal(task.completed, false);
+  });
+  
+  // Verify tasks are sorted by createdAt
+  for (let i = 1; i < response.body.length; i++) {
+    const prevDate = new Date(response.body[i - 1].createdAt);
+    const currDate = new Date(response.body[i].createdAt);
+    t.ok(prevDate <= currDate);
+  }
+  t.end();
+});
+
 tap.teardown(() => {
   process.exit(0);
 });

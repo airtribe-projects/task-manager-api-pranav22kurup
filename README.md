@@ -45,6 +45,8 @@ The server will start on port 3000. You should see:
 Server is listening on 3000
 ```
 
+**Note:** The main entry point for the application is `app.js`.
+
 ## API Endpoints
 
 ### 1. Get All Tasks

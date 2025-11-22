@@ -23,6 +23,54 @@ tap.test("POST /tasks with invalid data", async (t) => {
   t.end();
 });
 
+tap.test("POST /tasks with empty title", async (t) => {
+  const newTask = {
+    title: "",
+    description: "Description",
+    completed: false,
+  };
+  const response = await server.post("/tasks").send(newTask);
+  t.equal(response.status, 400);
+  t.match(response.body, { error: "Title and description cannot be empty" });
+  t.end();
+});
+
+tap.test("POST /tasks with empty description", async (t) => {
+  const newTask = {
+    title: "Title",
+    description: "",
+    completed: false,
+  };
+  const response = await server.post("/tasks").send(newTask);
+  t.equal(response.status, 400);
+  t.match(response.body, { error: "Title and description cannot be empty" });
+  t.end();
+});
+
+tap.test("POST /tasks with whitespace only title", async (t) => {
+  const newTask = {
+    title: "   ",
+    description: "Description",
+    completed: false,
+  };
+  const response = await server.post("/tasks").send(newTask);
+  t.equal(response.status, 400);
+  t.match(response.body, { error: "Title and description cannot be empty" });
+  t.end();
+});
+
+tap.test("POST /tasks with non-boolean completed", async (t) => {
+  const newTask = {
+    title: "Title",
+    description: "Description",
+    completed: "false",
+  };
+  const response = await server.post("/tasks").send(newTask);
+  t.equal(response.status, 400);
+  t.match(response.body, { error: "Completed must be a boolean value" });
+  t.end();
+});
+
 tap.test("GET /tasks", async (t) => {
   const response = await server.get("/tasks");
   t.equal(response.status, 200);
@@ -86,6 +134,30 @@ tap.test("PUT /tasks/:id with invalid data", async (t) => {
   };
   const response = await server.put("/tasks/1").send(updatedTask);
   t.equal(response.status, 400);
+  t.end();
+});
+
+tap.test("PUT /tasks/:id with empty title", async (t) => {
+  const updatedTask = {
+    title: "",
+    description: "Updated Task Description",
+    completed: true,
+  };
+  const response = await server.put("/tasks/1").send(updatedTask);
+  t.equal(response.status, 400);
+  t.match(response.body, { error: "Title and description cannot be empty" });
+  t.end();
+});
+
+tap.test("PUT /tasks/:id with empty description", async (t) => {
+  const updatedTask = {
+    title: "Updated Task",
+    description: "",
+    completed: true,
+  };
+  const response = await server.put("/tasks/1").send(updatedTask);
+  t.equal(response.status, 400);
+  t.match(response.body, { error: "Title and description cannot be empty" });
   t.end();
 });
 

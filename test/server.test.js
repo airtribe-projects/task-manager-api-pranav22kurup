@@ -223,7 +223,7 @@ tap.test("POST /tasks with priority", async (t) => {
   const response = await server.post("/tasks").send(newTask);
   t.equal(response.status, 201);
   t.equal(response.body.priority, "high");
-  t.hasOwnProp(response.body, "createdAt");
+  t.ok(response.body.createdAt, "Task should have a createdAt timestamp");
   t.end();
 });
 
